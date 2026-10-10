@@ -135,6 +135,11 @@ public class App {
                             
                             System.out.println("\n--- Degree Audit ---");
                             DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
+
+                            System.out.println("\n--- Tuition ---");
+                            DegreeAuditTuition.calculateTuition();
+                            DegreeAuditTuition.makePayment();
+
                         }
                     } else {
                         System.out.println("\n[Error] Invalid credentials. Please try again.");
