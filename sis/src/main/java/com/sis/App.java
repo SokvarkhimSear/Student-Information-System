@@ -137,8 +137,8 @@ public class App {
                             DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
 
                             System.out.println("\n--- Tuition ---");
-                            DegreeAuditTuition.calculateTuition();
-                            DegreeAuditTuition.makePayment();
+                            DegreeAuditTuition.calculateTuition(4, 3.5);
+                            DegreeAuditTuition.makePayment(scanner);
 
                         }
                     } else {

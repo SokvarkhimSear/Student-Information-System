@@ -1,8 +1,7 @@
 package com.sis;
+import java.util.Scanner;
 
 public class DegreeAuditTuition {
-    // This method will run the degree audit for a student based on their major and completed credits
-    // Implementation will be added here
     // Step 1: how many credits each major needs
     public static int getRequiredCredits(String major) {
         switch (major) {
@@ -45,11 +44,56 @@ public class DegreeAuditTuition {
             System.out.println("Graduation eligibility: NOT ELIGIBLE");
         }
     }
-    public static void calculateTuition(){
+    static double costPerCourse = 600;
+    static double amountDue = 0;
+    static double balance = 0;
+    public static void calculateTuition(int coursesTaken, double gpa){
+        double tuition = coursesTaken * costPerCourse;
+        double discountRate;
+        if (gpa >= 3.5){
+            discountRate = 0.2;
+        }else if (gpa >=3.0){
+            discountRate = 0.1;
+        }else{
+            discountRate = 0.0;
+        }
 
+        double discount = tuition * discountRate;
+        amountDue = tuition - discount + balance;
+        System.out.println("Courses taken: " + coursesTaken);
+        System.out.printf("Tuition: $%.2f%n", tuition);
+        System.out.printf("Scholarship discount: -$%.2f%n", discount);
+        System.out.printf("Previous balance: $%.2f%n", balance);
+        System.out.printf("Amount due: $%.2f%n", amountDue);
     }
-    public static void makePayment(){
-        
+    public static void makePayment(Scanner scanner){
+        if (amountDue <= 0){
+            System.out.println("Nothing to pay.");
+            return;
+        }
+        System.out.print("Enter payment amount: $");
+        double paid = Double.parseDouble(scanner.nextLine().trim());
+
+        // ask again while the amount is invalid
+        while (paid < 0 || paid > amountDue) {
+            System.out.println("[Error] Invalid amount. Try again.");
+            System.out.print("Enter payment amount: $");
+            paid = Double.parseDouble(scanner.nextLine().trim());
+        }
+
+        balance = amountDue - paid;
+
+        if (paid == amountDue) {
+            System.out.println("Payment status: PAID");
+        } else if (paid > 0) {
+            System.out.println("Payment status: PARTIAL");
+            System.out.printf("Remaining balance (carries over): $%.2f%n", balance);
+        } else {
+            System.out.println("Payment status: UNPAID");
+            System.out.printf("Remaining balance (carries over): $%.2f%n", balance);
+        }
+
+        amountDue = balance;
     }
 }
 
