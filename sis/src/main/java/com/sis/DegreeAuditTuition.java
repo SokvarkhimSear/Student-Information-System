@@ -44,33 +44,44 @@ public class DegreeAuditTuition {
             System.out.println("Graduation eligibility: NOT ELIGIBLE");
         }
     }
+
     static double costPerCourse = 600;
+    static double tuition = 0;
+    static double discount = 0;
     static double amountDue = 0;
-    static double balance = 0;
-    public static void calculateTuition(int coursesTaken, double gpa){
-        double tuition = coursesTaken * costPerCourse;
-        double discountRate;
-        if (gpa >= 3.5){
-            discountRate = 0.2;
-        }else if (gpa >=3.0){
-            discountRate = 0.1;
-        }else{
-            discountRate = 0.0;
+    static boolean tuitionCalculated = false;
+
+    public static void calculateTuition(int coursesTaken, double gpa) {
+        if (!tuitionCalculated) {
+            tuition = coursesTaken * costPerCourse;
+
+            double discountRate;
+            if (gpa >= 3.5) {
+                discountRate = 0.2;
+            } else if (gpa >= 3.0) {
+                discountRate = 0.1;
+            } else {
+                discountRate = 0.0;
+            }
+
+            discount = tuition * discountRate;
+            amountDue = tuition - discount;
+            tuitionCalculated = true;
         }
 
-        double discount = tuition * discountRate;
-        amountDue = tuition - discount + balance;
         System.out.println("Courses taken: " + coursesTaken);
         System.out.printf("Tuition: $%.2f%n", tuition);
         System.out.printf("Scholarship discount: -$%.2f%n", discount);
-        System.out.printf("Previous balance: $%.2f%n", balance);
+        System.out.printf("Paid so far: $%.2f%n", tuition - discount - amountDue);
         System.out.printf("Amount due: $%.2f%n", amountDue);
     }
-    public static void makePayment(Scanner scanner){
-        if (amountDue <= 0){
-            System.out.println("Nothing to pay.");
+
+    public static void makePayment(Scanner scanner) {
+        if (amountDue <= 0) {
+            System.out.println("Payment status: PAID");
             return;
         }
+
         System.out.print("Enter payment amount: $");
         double paid = Double.parseDouble(scanner.nextLine().trim());
 
@@ -81,19 +92,16 @@ public class DegreeAuditTuition {
             paid = Double.parseDouble(scanner.nextLine().trim());
         }
 
-        balance = amountDue - paid;
+        amountDue = amountDue - paid;
 
-        if (paid == amountDue) {
+        if (amountDue == 0) {
             System.out.println("Payment status: PAID");
         } else if (paid > 0) {
             System.out.println("Payment status: PARTIAL");
-            System.out.printf("Remaining balance (carries over): $%.2f%n", balance);
+            System.out.printf("Remaining balance (carries over): $%.2f%n", amountDue);
         } else {
             System.out.println("Payment status: UNPAID");
-            System.out.printf("Remaining balance (carries over): $%.2f%n", balance);
+            System.out.printf("Remaining balance (carries over): $%.2f%n", amountDue);
         }
-
-        amountDue = balance;
     }
 }
-
