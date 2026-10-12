@@ -41,7 +41,7 @@ public class StudentAcademicView {
                 case "4": showAnnouncement(); break;
                 case "5": showDegreeAudit(s, major); break;
                 case "6": showTuition(scanner, s); break;
-                case "7": App.changePassword(scanner); break;
+                case "7": changePassword(scanner); break;
                 case "8": System.out.println("Logging out..."); break;
                 default:  System.out.println("Invalid choice. Pick 1 to 8.");
             }
@@ -115,5 +115,31 @@ public class StudentAcademicView {
         System.out.println("\n--- Tuition ---");
         DegreeAuditTuition.calculateTuition(FacultyPortal.COURSES, calculateGpa(s));
         DegreeAuditTuition.makePayment(scanner);
+    }
+
+    static void changePassword(Scanner scanner) {
+        System.out.print("Enter old password: ");
+        String oldPass = scanner.nextLine().trim();
+        System.out.print("Enter new password: ");
+        String newPass = scanner.nextLine().trim();
+
+        if (newPass.length() < 6) {
+            System.out.println("[Error] New password must be at least 6 characters.");
+            return;
+        }
+
+        if (App.currentUser.equals(App.s1ID) && oldPass.equals(App.s1Pass)) {
+            App.s1Pass = newPass;
+        } else if (App.currentUser.equals(App.s2ID) && oldPass.equals(App.s2Pass)) {
+            App.s2Pass = newPass;
+        } else if (App.currentUser.equals(App.s3ID) && oldPass.equals(App.s3Pass)) {
+            App.s3Pass = newPass;
+        } else if (App.currentUser.equals(App.s4ID) && oldPass.equals(App.s4Pass)) {
+            App.s4Pass = newPass;
+        } else {
+            System.out.println("[Error] Old password is wrong.");
+            return;
+        }
+        System.out.println("[Success] Password changed.");
     }
 }
