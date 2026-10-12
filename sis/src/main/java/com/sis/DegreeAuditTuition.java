@@ -8,12 +8,14 @@ public class DegreeAuditTuition {
     static final double PASS_MARK = 60;
 
     // how much each student has paid so far (one slot per student)
-    static double[] paid = new double[App.studentIDs.length];
+    static double[] paid = new double[4];
 
     public static int getRequiredCredits(String major) {
         switch (major) {
             case "IT":
+                return REQUIRED_CREDITS;
             case "Law":
+                return REQUIRED_CREDITS;
             case "Business":
                 return REQUIRED_CREDITS;
             default:
@@ -49,28 +51,36 @@ public class DegreeAuditTuition {
         }
     }
 
-    private static double round2(double x) {
-        return Math.round(x * 100) / 100.0;
+    // rounds money to 2 decimal places (same trick as the GPA in FacultyPortal)
+    static double roundMoney(double x) {
+        return (int) (x * 100 + 0.5) / 100.0;
     }
 
-    private static double discountRate(double gpa) {
-        if (gpa >= 3.5) return 0.2;
-        if (gpa >= 3.0) return 0.1;
-        return 0.0;
+    static double discountRate(double gpa) {
+        if (gpa >= 3.5) {
+            return 0.2;
+        } else if (gpa >= 3.0) {
+            return 0.1;
+        } else {
+            return 0.0;
+        }
     }
 
     static double getTuition(int coursesTaken) {
-        return round2(coursesTaken * COST_PER_COURSE);
+        return roundMoney(coursesTaken * COST_PER_COURSE);
     }
 
     static double getDiscount(int coursesTaken, double gpa) {
-        return round2(getTuition(coursesTaken) * discountRate(gpa));
+        return roundMoney(getTuition(coursesTaken) * discountRate(gpa));
     }
 
     // always recalculated from the current GPA, so edited grades stay consistent
     static double getAmountDue(int s, int coursesTaken, double gpa) {
-        double due = round2(getTuition(coursesTaken) - getDiscount(coursesTaken, gpa) - paid[s]);
-        return due < 0.01 ? 0 : due;
+        double due = roundMoney(getTuition(coursesTaken) - getDiscount(coursesTaken, gpa) - paid[s]);
+        if (due < 0.01) {
+            due = 0;
+        }
+        return due;
     }
 
     public static void calculateTuition(int s, int coursesTaken, double gpa) {
@@ -86,7 +96,7 @@ public class DegreeAuditTuition {
         for (int i = 0; i < FacultyPortal.COURSES; i++) {
             double g = FacultyPortal.grades[s * FacultyPortal.COURSES + i];
             if (g >= PASS_MARK) {
-                credits += FacultyPortal.CREDITS;
+                credits = credits + FacultyPortal.CREDITS;
             }
         }
         return credits;
@@ -100,7 +110,7 @@ public class DegreeAuditTuition {
         }
 
         double payment = App.readDouble(scanner, "Enter payment amount: $", 0, due);
-        paid[s] = round2(paid[s] + payment);
+        paid[s] = roundMoney(paid[s] + payment);
 
         due = getAmountDue(s, coursesTaken, gpa);
         if (due == 0) {

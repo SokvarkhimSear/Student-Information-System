@@ -59,7 +59,12 @@ public class StudentAcademicView {
         System.out.println("\n===== MY COURSES (" + major + ") =====");
         for (int i = 0; i < FacultyPortal.COURSES; i++) {
             double g = FacultyPortal.grades[s * FacultyPortal.COURSES + i];
-            String status = (g >= PASS_MARK) ? "PASS" : "FAIL";
+            String status;
+            if (g >= PASS_MARK) {
+                status = "PASS";
+            } else {
+                status = "FAIL";
+            }
             System.out.println((i + 1) + ". " + getCourseName(major, i + 1) + " - " + g + " (" + status + ")");
         }
     }
@@ -79,12 +84,12 @@ public class StudentAcademicView {
         }
         System.out.println("Your attendance: " + FacultyPortal.attendance[s] + "%");
         if (FacultyPortal.attendance[s] < ATTENDANCE_WARNING) {
-            System.out.println("Warning: your attendance is below " + (int) ATTENDANCE_WARNING + "%.");
+            System.out.println("Warning: your attendance is below 75%.");
         }
     }
 
     static void showAnnouncement() {
-        if (FacultyPortal.announcement.isEmpty()) {
+        if (FacultyPortal.announcement.equals("")) {
             System.out.println("No announcements right now.");
         } else {
             System.out.println("Announcement: " + FacultyPortal.announcement);

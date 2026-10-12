@@ -63,8 +63,14 @@ public class App {
         }
 
         boolean isFaculty = currentRole.equals("FACULTY");
-        int idx = isFaculty ? -1 : findStudentIndex(currentUser);
-        String actualPass = isFaculty ? facultyPass : studentPasses[idx];
+        int idx = -1;
+        String actualPass;
+        if (isFaculty) {
+            actualPass = facultyPass;
+        } else {
+            idx = findStudentIndex(currentUser);
+            actualPass = studentPasses[idx];
+        }
 
         System.out.print("Enter current password: ");
         String oldPass = scanner.nextLine().trim();
@@ -88,38 +94,34 @@ public class App {
         System.out.println("[Success] Password updated successfully!");
     }
 
-    // keeps asking until the user types a number between min and max
+    // keeps asking until the number is between min and max
     public static double readDouble(Scanner scanner, String prompt, double min, double max) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                double value = Double.parseDouble(scanner.nextLine().trim());
-                if (value >= min && value <= max) {
-                    return value;
-                }
-            } catch (NumberFormatException e) {
-                // not a number: fall through to the error message
-            }
+        System.out.print(prompt);
+        double value = scanner.nextDouble();
+        scanner.nextLine();
+        while (value < min || value > max) {
             System.out.printf("[Error] Enter a number from %.2f to %.2f.%n", min, max);
+            System.out.print(prompt);
+            value = scanner.nextDouble();
+            scanner.nextLine();
         }
+        return value;
     }
 
     public static int readInt(Scanner scanner, String prompt, int min, int max) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                int value = Integer.parseInt(scanner.nextLine().trim());
-                if (value >= min && value <= max) {
-                    return value;
-                }
-            } catch (NumberFormatException e) {
-                // not a whole number: fall through to the error message
-            }
+        System.out.print(prompt);
+        int value = scanner.nextInt();
+        scanner.nextLine();
+        while (value < min || value > max) {
             System.out.println("[Error] Enter a whole number from " + min + " to " + max + ".");
+            System.out.print(prompt);
+            value = scanner.nextInt();
+            scanner.nextLine();
         }
+        return value;
     }
 
-    private static void loginFlow(Scanner scanner) {
+    public static void loginFlow(Scanner scanner) {
         for (int attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
             System.out.print("Enter Username / Student ID: ");
             String user = scanner.nextLine().trim();

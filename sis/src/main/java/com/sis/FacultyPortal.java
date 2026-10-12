@@ -7,13 +7,14 @@ public class FacultyPortal {
     static final int CREDITS = 3;
 
     static String[] names = {"Student A", "Student B", "Student C", "Student D"};
-    static double[] grades = new double[App.studentIDs.length * COURSES];
-    static double[] attendance = new double[App.studentIDs.length];
-    static boolean[] hasData = new boolean[App.studentIDs.length];
+    static double[] grades = new double[4 * COURSES];
+    static double[] attendance = new double[4];
+    static boolean[] hasData = new boolean[4];
     static String announcement = "";
 
     public static void facultyMenu(Scanner scanner) {
         String choice;
+        int s;
         do {
             System.out.println("\n--- Faculty Menu ---");
             System.out.println("a. Enter semester data");
@@ -26,21 +27,24 @@ public class FacultyPortal {
             choice = scanner.nextLine().trim().toLowerCase();
 
             switch (choice) {
-                case "a": {
-                    int s = selectStudent(scanner);
-                    if (s != -1) enterGrades(scanner, s);
+                case "a":
+                    s = selectStudent(scanner);
+                    if (s != -1) {
+                        enterGrades(scanner, s);
+                    }
                     break;
-                }
-                case "b": {
-                    int s = selectStudent(scanner);
-                    if (s != -1) editGrade(scanner, s);
+                case "b":
+                    s = selectStudent(scanner);
+                    if (s != -1) {
+                        editGrade(scanner, s);
+                    }
                     break;
-                }
-                case "c": {
-                    int s = selectStudent(scanner);
-                    if (s != -1) viewReport(s);
+                case "c":
+                    s = selectStudent(scanner);
+                    if (s != -1) {
+                        viewReport(s);
+                    }
                     break;
-                }
                 case "d": postAnnouncement(scanner); break;
                 case "e": App.changePassword(scanner); break;
                 case "f": System.out.println("Logging out..."); break;
@@ -51,19 +55,23 @@ public class FacultyPortal {
 
     // asks for a student ID each time, so faculty can switch students; blank input cancels
     static int selectStudent(Scanner scanner) {
-        while (true) {
+        int s = -2;
+        while (s == -2) {
             System.out.print("Enter student ID (press Enter to cancel): ");
             String id = scanner.nextLine().trim();
             if (id.isEmpty()) {
-                return -1;
+                s = -1;
+            } else {
+                int found = App.findStudentIndex(id);
+                if (found == -1) {
+                    System.out.println("Student not found.");
+                } else {
+                    System.out.println("Selected: " + names[found] + " (" + App.studentIDs[found] + ")");
+                    s = found;
+                }
             }
-            int s = App.findStudentIndex(id);
-            if (s != -1) {
-                System.out.println("Selected: " + names[s] + " (" + App.studentIDs[s] + ")");
-                return s;
-            }
-            System.out.println("Student not found.");
         }
+        return s;
     }
 
     static void enterGrades(Scanner scanner, int s) {
