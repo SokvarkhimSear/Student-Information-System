@@ -118,31 +118,41 @@ public class App {
 
             switch (choice) {
                 case "1":
-                    System.out.print("Enter Username / Student ID: ");
-                    String user = scanner.nextLine().trim();
-                    System.out.print("Enter Password: ");
-                    String pass = scanner.nextLine().trim();
+                    //3 attempts to login
+                    int maxAttempts = 3;
 
-                    if (login(user, pass)) {
-                        System.out.println("\n[Login Successful] Welcome, " + currentUser + " (" + currentRole + ")");
-                        
-                        //sends to friend's portal 
-                        if (currentRole.equals("FACULTY")) {
-                            FacultyPortal.enterSemesterData();
-                        } else if (currentRole.equals("STUDENT")) {
-                            System.out.println("\n--- Academic View ---");
-                            System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
+                    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+                        System.out.print("Enter Username / Student ID: ");
+                        String user = scanner.nextLine().trim();
+                        System.out.print("Enter Password: ");
+                        String pass = scanner.nextLine().trim();
+
+                        if (login(user, pass)) {
+                            System.out.println("\n[Login Successful] Welcome, " + currentUser + " (" + currentRole + ")");
                             
-                            System.out.println("\n--- Degree Audit ---");
-                            DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
+                            // sends to friend's portal 
+                            if (currentRole.equals("FACULTY")) {
+                                FacultyPortal.enterSemesterData();
+                            } else if (currentRole.equals("STUDENT")) {
+                                System.out.println("\n--- Academic View ---");
+                                System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
+                                
+                                System.out.println("\n--- Degree Audit ---");
+                                DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
 
-                            System.out.println("\n--- Tuition ---");
-                            DegreeAuditTuition.calculateTuition(4, 3.5);
-                            DegreeAuditTuition.makePayment(scanner);
-
+                                System.out.println("\n--- Tuition ---");
+                                DegreeAuditTuition.calculateTuition(4, 3.5);
+                                DegreeAuditTuition.makePayment(scanner);
+                            }
+                            break; 
+                        } else {
+                            int remaining = maxAttempts - attempt;
+                            if (remaining > 0) {
+                                System.out.println("\n[Error] Invalid credentials. Attempts remaining: " + remaining + "\n");
+                            } else {
+                                System.out.println("\n[Access Denied] Too many failed login attempts. Returning to main menu.");
+                            }
                         }
-                    } else {
-                        System.out.println("\n[Error] Invalid credentials. Please try again.");
                     }
                     break;
 
