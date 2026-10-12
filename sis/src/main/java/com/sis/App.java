@@ -7,10 +7,9 @@ public class App {
     static String facultyUser = "admin";
     static String facultyPass = "faculty123";
 
-    static String s1ID = "2026400", s1Pass = "pass101", s1Major = "IT";
-    static String s2ID = "2026399", s2Pass = "pass102", s2Major = "Law";
-    static String s3ID = "2026123", s3Pass = "pass103", s3Major = "Business";
-    static String s4ID = "2026122", s4Pass = "pass104", s4Major = "IT";
+    static String[] studentIDs = {"2026400", "2026399", "2026123", "2026122"};
+    static String[] studentPasses = {"pass101", "pass102", "pass103", "pass104"};
+    static String[] studentMajors = {"IT", "Law", "Business", "IT"};
 
     //session role
     static String currentUser = "";
@@ -27,36 +26,13 @@ public class App {
             return true;
         }
 
-        //Student1
-        if (username.equalsIgnoreCase(s1ID) && password.equals(s1Pass)) {
-            currentUser = s1ID;
-            currentRole = "STUDENT";
-            currentMajor = s1Major;
-            return true;
-        }
-
-        //Student2
-        if (username.equalsIgnoreCase(s2ID) && password.equals(s2Pass)) {
-            currentUser = s2ID;
-            currentRole = "STUDENT";
-            currentMajor = s2Major;
-            return true;
-        }
-
-        //Student3
-        if (username.equalsIgnoreCase(s3ID) && password.equals(s3Pass)) {
-            currentUser = s3ID;
-            currentRole = "STUDENT";
-            currentMajor = s3Major;
-            return true;
-        }
-
-        //Student4
-        if (username.equalsIgnoreCase(s4ID) && password.equals(s4Pass)) {
-            currentUser = s4ID;
-            currentRole = "STUDENT";
-            currentMajor = s4Major;
-            return true;
+        for (int i = 0; i < studentIDs.length; i++) {
+            if (username.equalsIgnoreCase(studentIDs[i]) && password.equals(studentPasses[i])) {
+                currentUser = studentIDs[i];
+                currentRole = "STUDENT";
+                currentMajor = studentMajors[i];
+                return true;
+            }
         }
 
         //no matching credentials
@@ -75,29 +51,29 @@ public class App {
         String oldPass = scanner.nextLine().trim();
 
         //verify old password
-        boolean verified = false;
-        if (currentRole.equals("FACULTY") && oldPass.equals(facultyPass)) verified = true;
-        if (currentUser.equalsIgnoreCase(s1ID) && oldPass.equals(s1Pass)) verified = true;
-        if (currentUser.equalsIgnoreCase(s2ID) && oldPass.equals(s2Pass)) verified = true;
-        if (currentUser.equalsIgnoreCase(s3ID) && oldPass.equals(s3Pass)) verified = true;
-        if (currentUser.equalsIgnoreCase(s4ID) && oldPass.equals(s4Pass)) verified = true;
-
-        if (!verified) {
-            System.out.println("[Error] Incorrect current password.");
+        if (currentRole.equals("FACULTY")) {
+            if (oldPass.equals(facultyPass)) {
+                System.out.print("Enter new password: ");
+                facultyPass = scanner.nextLine().trim();
+                System.out.println("[Success] Faculty password updated successfully!");
+            } else {
+                System.out.println("[Error] Incorrect current password.");
+            }
             return;
         }
 
-        //ask for new password
-        System.out.print("Enter new password: ");
-        String newPass = scanner.nextLine().trim();
-
-        if (currentRole.equals("FACULTY")) facultyPass = newPass;
-        else if (currentUser.equalsIgnoreCase(s1ID)) s1Pass = newPass;
-        else if (currentUser.equalsIgnoreCase(s2ID)) s2Pass = newPass;
-        else if (currentUser.equalsIgnoreCase(s3ID)) s3Pass = newPass;
-        else if (currentUser.equalsIgnoreCase(s4ID)) s4Pass = newPass;
-
-        System.out.println("[Success] Password updated successfully!");
+        for (int i = 0; i < studentIDs.length; i++) {
+            if (currentUser.equalsIgnoreCase(studentIDs[i])) {
+                if (oldPass.equals(studentPasses[i])) {
+                    System.out.print("Enter new password: ");
+                    studentPasses[i] = scanner.nextLine().trim();
+                    System.out.println("[Success] Password updated successfully!");
+                } else {
+                    System.out.println("[Error] Incorrect current password.");
+                }
+                return;
+            }
+        }
     }
 
     //The UI ig
@@ -134,8 +110,15 @@ public class App {
                             if (currentRole.equals("FACULTY")) {
                                 FacultyPortal.enterSemesterData();
                             } else if (currentRole.equals("STUDENT")) {
-                                int s = FacultyPortal.findStudent(currentUser);
-                                StudentAcademicView.showStudentMenu(scanner, s, currentMajor);
+                                System.out.println("\n--- Academic View ---");
+                                System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
+                                
+                                System.out.println("\n--- Degree Audit ---");
+                                DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
+
+                                System.out.println("\n--- Tuition ---");
+                                DegreeAuditTuition.calculateTuition(4, 3.5);
+                                DegreeAuditTuition.makePayment(scanner);
                             }
                             break; 
                         } else {
