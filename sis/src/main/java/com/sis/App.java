@@ -134,20 +134,8 @@ public class App {
                             if (currentRole.equals("FACULTY")) {
                                 FacultyPortal.enterSemesterData();
                             } else if (currentRole.equals("STUDENT")) {
-<<<<<<< HEAD
                                 int s = FacultyPortal.findStudent(currentUser);
                                 StudentAcademicView.showStudentMenu(scanner, s, currentMajor);
-=======
-                                System.out.println("\n--- Academic View ---");
-                                System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
-                                
-                                System.out.println("\n--- Degree Audit ---");
-                                DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
-
-                                System.out.println("\n--- Tuition ---");
-                                DegreeAuditTuition.calculateTuition(4, 3.5);
-                                DegreeAuditTuition.makePayment(scanner);
->>>>>>> 9b1e953bc4e9cdcd33d6b94d7dce15bed651cb13
                             }
                             break; 
                         } else {
