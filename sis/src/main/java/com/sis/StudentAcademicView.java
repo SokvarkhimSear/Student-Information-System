@@ -3,6 +3,9 @@ package com.sis;
 import java.util.Scanner;
 
 public class StudentAcademicView {
+    static final double PASS_MARK = 60;
+    static final double ATTENDANCE_WARNING = 75;
+
     static String[] majors = {"IT", "Law", "Business"};
     static String[][] courseNames = {
         {"Programming", "Databases", "Networking", "Web Development"},
@@ -41,7 +44,7 @@ public class StudentAcademicView {
                 case "4": showAnnouncement(); break;
                 case "5": showDegreeAudit(s, major); break;
                 case "6": showTuition(scanner, s); break;
-                case "7": changePassword(scanner); break;
+                case "7": App.changePassword(scanner); break;
                 case "8": System.out.println("Logging out..."); break;
                 default:  System.out.println("Invalid choice. Pick 1 to 8.");
             }
@@ -56,23 +59,9 @@ public class StudentAcademicView {
         System.out.println("\n===== MY COURSES (" + major + ") =====");
         for (int i = 0; i < FacultyPortal.COURSES; i++) {
             double g = FacultyPortal.grades[s * FacultyPortal.COURSES + i];
-            String status;
-            if (g >= 60) {
-                status = "PASS";
-            } else {
-                status = "FAIL";
-            }
+            String status = (g >= PASS_MARK) ? "PASS" : "FAIL";
             System.out.println((i + 1) + ". " + getCourseName(major, i + 1) + " - " + g + " (" + status + ")");
         }
-    }
-
-    static double calculateGpa(int s) {
-        double totalPoints = 0;
-        for (int i = 0; i < FacultyPortal.COURSES; i++) {
-            totalPoints += FacultyPortal.gradePoint(FacultyPortal.grades[s * FacultyPortal.COURSES + i]);
-        }
-        double gpa = totalPoints / FacultyPortal.COURSES;
-        return (int) (gpa * 100) / 100.0;
     }
 
     static void showGpa(int s) {
@@ -80,7 +69,7 @@ public class StudentAcademicView {
             System.out.println("No grades yet. Please wait for your faculty.");
             return;
         }
-        System.out.println("Your GPA: " + calculateGpa(s));
+        System.out.println("Your GPA: " + FacultyPortal.calculateGpa(s));
     }
 
     static void showAttendance(int s) {
@@ -89,13 +78,13 @@ public class StudentAcademicView {
             return;
         }
         System.out.println("Your attendance: " + FacultyPortal.attendance[s] + "%");
-        if (FacultyPortal.attendance[s] < 75) {
-            System.out.println("Warning: your attendance is below 75%.");
+        if (FacultyPortal.attendance[s] < ATTENDANCE_WARNING) {
+            System.out.println("Warning: your attendance is below " + (int) ATTENDANCE_WARNING + "%.");
         }
     }
 
     static void showAnnouncement() {
-        if (FacultyPortal.announcement.equals("")) {
+        if (FacultyPortal.announcement.isEmpty()) {
             System.out.println("No announcements right now.");
         } else {
             System.out.println("Announcement: " + FacultyPortal.announcement);
@@ -113,33 +102,8 @@ public class StudentAcademicView {
             return;
         }
         System.out.println("\n--- Tuition ---");
-        DegreeAuditTuition.calculateTuition(FacultyPortal.COURSES, calculateGpa(s));
-        DegreeAuditTuition.makePayment(scanner);
-    }
-
-    static void changePassword(Scanner scanner) {
-        System.out.print("Enter old password: ");
-        String oldPass = scanner.nextLine().trim();
-        System.out.print("Enter new password: ");
-        String newPass = scanner.nextLine().trim();
-
-        if (newPass.length() < 6) {
-            System.out.println("[Error] New password must be at least 6 characters.");
-            return;
-        }
-
-        if (App.currentUser.equals(App.s1ID) && oldPass.equals(App.s1Pass)) {
-            App.s1Pass = newPass;
-        } else if (App.currentUser.equals(App.s2ID) && oldPass.equals(App.s2Pass)) {
-            App.s2Pass = newPass;
-        } else if (App.currentUser.equals(App.s3ID) && oldPass.equals(App.s3Pass)) {
-            App.s3Pass = newPass;
-        } else if (App.currentUser.equals(App.s4ID) && oldPass.equals(App.s4Pass)) {
-            App.s4Pass = newPass;
-        } else {
-            System.out.println("[Error] Old password is wrong.");
-            return;
-        }
-        System.out.println("[Success] Password changed.");
+        double gpa = FacultyPortal.calculateGpa(s);
+        DegreeAuditTuition.calculateTuition(s, FacultyPortal.COURSES, gpa);
+        DegreeAuditTuition.makePayment(scanner, s, FacultyPortal.COURSES, gpa);
     }
 }

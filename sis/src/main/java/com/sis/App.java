@@ -3,7 +3,10 @@ package com.sis;
 import java.util.Scanner;
 
 public class App {
-    //This is the preset logins and stuff
+    static final int MIN_PASSWORD_LENGTH = 6;
+    static final int MAX_LOGIN_ATTEMPTS = 3;
+
+    // preset logins
     static String facultyUser = "admin";
     static String facultyPass = "faculty123";
 
@@ -11,14 +14,22 @@ public class App {
     static String[] studentPasses = {"pass101", "pass102", "pass103", "pass104"};
     static String[] studentMajors = {"IT", "Law", "Business", "IT"};
 
-    //session role
+    // session
     static String currentUser = "";
     static String currentRole = "";
     static String currentMajor = "";
 
-    //Login
+    // returns the student's position in the arrays, or -1 if not found
+    public static int findStudentIndex(String id) {
+        for (int i = 0; i < studentIDs.length; i++) {
+            if (studentIDs[i].equalsIgnoreCase(id)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public static boolean login(String username, String password) {
-        //Faculty
         if (username.equals(facultyUser) && password.equals(facultyPass)) {
             currentUser = facultyUser;
             currentRole = "FACULTY";
@@ -26,57 +37,117 @@ public class App {
             return true;
         }
 
-        for (int i = 0; i < studentIDs.length; i++) {
-            if (username.equalsIgnoreCase(studentIDs[i]) && password.equals(studentPasses[i])) {
-                currentUser = studentIDs[i];
-                currentRole = "STUDENT";
-                currentMajor = studentMajors[i];
-                return true;
-            }
+        int i = findStudentIndex(username);
+        if (i != -1 && password.equals(studentPasses[i])) {
+            currentUser = studentIDs[i];
+            currentRole = "STUDENT";
+            currentMajor = studentMajors[i];
+            return true;
         }
 
-        //no matching credentials
         return false;
     }
 
-    //change password
+    // clears the session so nobody can reuse the previous login
+    public static void logout() {
+        currentUser = "";
+        currentRole = "";
+        currentMajor = "";
+    }
+
+    // used by both the faculty and student menus
     public static void changePassword(Scanner scanner) {
-        //check if they are logged in bc need to login to change password
         if (currentUser.isEmpty()) {
             System.out.println("\n[Error] You must log in first before changing your password!");
             return;
         }
 
+        boolean isFaculty = currentRole.equals("FACULTY");
+        int idx = isFaculty ? -1 : findStudentIndex(currentUser);
+        String actualPass = isFaculty ? facultyPass : studentPasses[idx];
+
         System.out.print("Enter current password: ");
         String oldPass = scanner.nextLine().trim();
-
-        //verify old password
-        if (currentRole.equals("FACULTY")) {
-            if (oldPass.equals(facultyPass)) {
-                System.out.print("Enter new password: ");
-                facultyPass = scanner.nextLine().trim();
-                System.out.println("[Success] Faculty password updated successfully!");
-            } else {
-                System.out.println("[Error] Incorrect current password.");
-            }
+        if (!oldPass.equals(actualPass)) {
+            System.out.println("[Error] Incorrect current password.");
             return;
         }
 
-        for (int i = 0; i < studentIDs.length; i++) {
-            if (currentUser.equalsIgnoreCase(studentIDs[i])) {
-                if (oldPass.equals(studentPasses[i])) {
-                    System.out.print("Enter new password: ");
-                    studentPasses[i] = scanner.nextLine().trim();
-                    System.out.println("[Success] Password updated successfully!");
-                } else {
-                    System.out.println("[Error] Incorrect current password.");
+        System.out.print("Enter new password: ");
+        String newPass = scanner.nextLine().trim();
+        if (newPass.length() < MIN_PASSWORD_LENGTH) {
+            System.out.println("[Error] New password must be at least " + MIN_PASSWORD_LENGTH + " characters.");
+            return;
+        }
+
+        if (isFaculty) {
+            facultyPass = newPass;
+        } else {
+            studentPasses[idx] = newPass;
+        }
+        System.out.println("[Success] Password updated successfully!");
+    }
+
+    // keeps asking until the user types a number between min and max
+    public static double readDouble(Scanner scanner, String prompt, double min, double max) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                double value = Double.parseDouble(scanner.nextLine().trim());
+                if (value >= min && value <= max) {
+                    return value;
                 }
+            } catch (NumberFormatException e) {
+                // not a number: fall through to the error message
+            }
+            System.out.printf("[Error] Enter a number from %.2f to %.2f.%n", min, max);
+        }
+    }
+
+    public static int readInt(Scanner scanner, String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                int value = Integer.parseInt(scanner.nextLine().trim());
+                if (value >= min && value <= max) {
+                    return value;
+                }
+            } catch (NumberFormatException e) {
+                // not a whole number: fall through to the error message
+            }
+            System.out.println("[Error] Enter a whole number from " + min + " to " + max + ".");
+        }
+    }
+
+    private static void loginFlow(Scanner scanner) {
+        for (int attempt = 1; attempt <= MAX_LOGIN_ATTEMPTS; attempt++) {
+            System.out.print("Enter Username / Student ID: ");
+            String user = scanner.nextLine().trim();
+            System.out.print("Enter Password: ");
+            String pass = scanner.nextLine().trim();
+
+            if (login(user, pass)) {
+                System.out.println("\n[Login Successful] Welcome, " + currentUser + " (" + currentRole + ")");
+
+                if (currentRole.equals("FACULTY")) {
+                    FacultyPortal.facultyMenu(scanner);
+                } else {
+                    StudentAcademicView.showStudentMenu(scanner, findStudentIndex(currentUser), currentMajor);
+                }
+
+                logout();
                 return;
+            }
+
+            int remaining = MAX_LOGIN_ATTEMPTS - attempt;
+            if (remaining > 0) {
+                System.out.println("\n[Error] Invalid credentials. Attempts remaining: " + remaining + "\n");
+            } else {
+                System.out.println("\n[Access Denied] Too many failed login attempts. Returning to main menu.");
             }
         }
     }
 
-    //The UI ig
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -86,63 +157,21 @@ public class App {
             System.out.println("   STUDENT INFORMATION SYSTEM (SIS)     ");
             System.out.println("=========================================");
             System.out.println("1. Login");
-            System.out.println("2. Change Password");
-            System.out.println("3. Exit");
+            System.out.println("2. Exit");
             System.out.print("Select an option: ");
 
             String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
-                    //3 attempts to login
-                    int maxAttempts = 3;
-
-                    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-                        System.out.print("Enter Username / Student ID: ");
-                        String user = scanner.nextLine().trim();
-                        System.out.print("Enter Password: ");
-                        String pass = scanner.nextLine().trim();
-
-                        if (login(user, pass)) {
-                            System.out.println("\n[Login Successful] Welcome, " + currentUser + " (" + currentRole + ")");
-                            
-                            // sends to friend's portal 
-                            if (currentRole.equals("FACULTY")) {
-                                FacultyPortal.enterSemesterData();
-                            } else if (currentRole.equals("STUDENT")) {
-                                System.out.println("\n--- Academic View ---");
-                                System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
-                                
-                                System.out.println("\n--- Degree Audit ---");
-                                DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
-
-                                System.out.println("\n--- Tuition ---");
-                                DegreeAuditTuition.calculateTuition(4, 3.5);
-                                DegreeAuditTuition.makePayment(scanner);
-                            }
-                            break; 
-                        } else {
-                            int remaining = maxAttempts - attempt;
-                            if (remaining > 0) {
-                                System.out.println("\n[Error] Invalid credentials. Attempts remaining: " + remaining + "\n");
-                            } else {
-                                System.out.println("\n[Access Denied] Too many failed login attempts. Returning to main menu.");
-                            }
-                        }
-                    }
+                    loginFlow(scanner);
                     break;
-
                 case "2":
-                    changePassword(scanner);
-                    break;
-
-                case "3":
                     System.out.println("Exiting System. Goodbye!");
                     running = false;
                     break;
-
                 default:
-                    System.out.println("Invalid choice. Please select 1, 2, or 3.");
+                    System.out.println("Invalid choice. Please select 1 or 2.");
             }
         }
         scanner.close();
