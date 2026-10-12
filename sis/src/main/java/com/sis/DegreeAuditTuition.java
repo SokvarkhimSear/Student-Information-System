@@ -75,6 +75,17 @@ public class DegreeAuditTuition {
         System.out.printf("Paid so far: $%.2f%n", tuition - discount - amountDue);
         System.out.printf("Amount due: $%.2f%n", amountDue);
     }
+    public static int countPassedCredits(int s) {
+        int credits = 0;
+        double minimumScore = 60;
+        for (int i = 0; i < FacultyPortal.COURSES; i++) {
+            double g = FacultyPortal.grades[s * FacultyPortal.COURSES + i];
+            if (g >= minimumScore) {
+                credits = credits + FacultyPortal.CREDITS;
+            }
+        }
+        return credits;
+    }
 
     public static void makePayment(Scanner scanner) {
         if (amountDue <= 0) {

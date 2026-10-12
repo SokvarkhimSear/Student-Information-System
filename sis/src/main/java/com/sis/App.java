@@ -137,11 +137,12 @@ public class App {
                                 System.out.println("\n--- Academic View ---");
                                 System.out.println("Enrolled Course: " + StudentAcademicView.getCourseName(currentMajor, 1));
                                 
+                                int s = FacultyPortal.findStudent(currentUser);
                                 System.out.println("\n--- Degree Audit ---");
-                                DegreeAuditTuition.runDegreeAudit(currentMajor, 30);
+                                DegreeAuditTuition.runDegreeAudit(currentMajor, DegreeAuditTuition.countPassedCredits(s));
 
                                 System.out.println("\n--- Tuition ---");
-                                DegreeAuditTuition.calculateTuition(4, 3.5);
+                                DegreeAuditTuition.calculateTuition(FacultyPortal.COURSES, 3.5);
                                 DegreeAuditTuition.makePayment(scanner);
                             }
                             break; 
