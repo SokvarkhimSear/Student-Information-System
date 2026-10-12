@@ -3,8 +3,7 @@ package com.sis;
 import java.util.Scanner;
 
 public class FacultyPortal {
-
-    // ---------- storage ----------
+    // storage
     static final int COURSES = 4;
     static final int CREDITS = 3;     
     static final double RATE = 150.0;   
@@ -24,10 +23,10 @@ public class FacultyPortal {
             System.out.print("Enter student ID: ");
             s = findStudent(scanner.nextLine().trim());
             if (s == -1) {
-                System.out.println("[Error] Student not found.");
+                System.out.println("Student not found.");
             }
         }
-
+        // Choices 
         String choice;
         do {
             System.out.println("\n--- Faculty Menu (" + names[s] + ") ---");
@@ -60,7 +59,7 @@ public class FacultyPortal {
         }
         return -1;
     }
-
+    //grade
     static void enterGrades(int s) {
         for (int i = 0; i < COURSES; i++) {
             grades[s * COURSES + i] = readScore("Grade for course " + (i + 1) + " (0-100): ");
@@ -75,14 +74,14 @@ public class FacultyPortal {
         while (value < 0 || value > 100) {
             System.out.print(prompt);
             value = scanner.nextDouble();
-            scanner.nextLine();                 // clear the leftover Enter
+            scanner.nextLine();                 
             if (value < 0 || value > 100) {
                 System.out.println("[Error] Enter a number from 0 to 100.");
             }
         }
         return value;
     }
-
+    //edit grade
     static void editGrade(int s) {
         if (!hasData[s]) {
             System.out.println("[Error] Enter semester data first (option a).");
@@ -97,7 +96,7 @@ public class FacultyPortal {
         grades[s * COURSES + (course - 1)] = readScore("New grade (0-100): ");
         System.out.println("[Success] Grade updated.");
     }
-
+    //report
     static void viewReport(int s) {
         if (!hasData[s]) {
             System.out.println("[Error] No data for this student yet.");
@@ -111,7 +110,7 @@ public class FacultyPortal {
             totalPoints += gradePoint(g);
         }
         double gpa = totalPoints / COURSES;
-        gpa = (int) (gpa * 100) / 100.0;        // cut to 2 decimals
+        gpa = (int) (gpa * 100) / 100.0;  
         System.out.println("GPA: " + gpa);
         System.out.println("Attendance: " + attendance[s] + "%");
         System.out.println("Tuition: $" + (COURSES * CREDITS * RATE));
@@ -124,7 +123,7 @@ public class FacultyPortal {
         else if (g >= 60) return 1.0;
         else return 0.0;
     }
-
+    //announcement
     static void postAnnouncement() {
         System.out.print("Enter announcement: ");
         announcement = scanner.nextLine().trim();
