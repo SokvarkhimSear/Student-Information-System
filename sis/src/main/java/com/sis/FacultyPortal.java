@@ -6,8 +6,7 @@ public class FacultyPortal {
     // storage
     static final int COURSES = 4;
     static final int CREDITS = 3;     
-    static final double RATE = 150.0;   
-
+    static final double RATE = 600.0;
     static Scanner scanner = new Scanner(System.in); 
 
     static String[] ids = {"2026400", "2026399", "2026123", "2026122"};
