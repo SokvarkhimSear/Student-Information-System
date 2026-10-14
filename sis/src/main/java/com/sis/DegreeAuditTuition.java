@@ -51,44 +51,26 @@ public class DegreeAuditTuition {
         }
     }
 
-    // rounds money to 2 decimal places (same trick as the GPA in FacultyPortal)
-    static double roundMoney(double x) {
-        return (int) (x * 100 + 0.5) / 100.0;
-    }
-
-    static double discountRate(double gpa) {
-        if (gpa >= 3.5) {
-            return 0.2;
-        } else if (gpa >= 3.0) {
-            return 0.1;
-        } else {
-            return 0.0;
-        }
-    }
-
-    static double getTuition(int coursesTaken) {
-        return roundMoney(coursesTaken * COST_PER_COURSE);
-    }
-
-    static double getDiscount(int coursesTaken, double gpa) {
-        return roundMoney(getTuition(coursesTaken) * discountRate(gpa));
-    }
-
-    // always recalculated from the current GPA, so edited grades stay consistent
-    static double getAmountDue(int s, int coursesTaken, double gpa) {
-        double due = roundMoney(getTuition(coursesTaken) - getDiscount(coursesTaken, gpa) - paid[s]);
-        if (due < 0.01) {
-            due = 0;
-        }
-        return due;
-    }
-
     public static void calculateTuition(int s, int coursesTaken, double gpa) {
+        double tuition = coursesTaken * COST_PER_COURSE;
+
+        double discountRate;
+        if (gpa >= 3.5) {
+            discountRate = 0.2;
+        } else if (gpa >= 3.0) {
+            discountRate = 0.1;
+        } else {
+            discountRate = 0.0;
+        }
+
+        double discount = tuition * discountRate;
+        double amountDue = tuition - discount - paid[s];
+
         System.out.println("Courses taken: " + coursesTaken);
-        System.out.printf("Tuition: $%.2f%n", getTuition(coursesTaken));
-        System.out.printf("Scholarship discount: -$%.2f%n", getDiscount(coursesTaken, gpa));
+        System.out.printf("Tuition: $%.2f%n", tuition);
+        System.out.printf("Scholarship discount: -$%.2f%n", discount);
         System.out.printf("Paid so far: $%.2f%n", paid[s]);
-        System.out.printf("Amount due: $%.2f%n", getAmountDue(s, coursesTaken, gpa));
+        System.out.printf("Amount due: $%.2f%n", amountDue);
     }
 
     public static int countPassedCredits(int s) {
@@ -103,24 +85,36 @@ public class DegreeAuditTuition {
     }
 
     public static void makePayment(Scanner scanner, int s, int coursesTaken, double gpa) {
-        double due = getAmountDue(s, coursesTaken, gpa);
-        if (due == 0) {
+        double tuition = coursesTaken * COST_PER_COURSE;
+
+        double discountRate;
+        if (gpa >= 3.5) {
+            discountRate = 0.2;
+        } else if (gpa >= 3.0) {
+            discountRate = 0.1;
+        } else {
+            discountRate = 0.0;
+        }
+
+        double amountDue = tuition - (tuition * discountRate) - paid[s];
+
+        if (amountDue <= 0) {
             System.out.println("Payment status: PAID");
             return;
         }
 
-        double payment = App.readDouble(scanner, "Enter payment amount: $", 0, due);
-        paid[s] = roundMoney(paid[s] + payment);
+        double payment = App.readDouble(scanner, "Enter payment amount: $", 0, amountDue);
+        paid[s] = paid[s] + payment;
+        amountDue = amountDue - payment;
 
-        due = getAmountDue(s, coursesTaken, gpa);
-        if (due == 0) {
+        if (amountDue <= 0) {
             System.out.println("Payment status: PAID");
         } else if (paid[s] > 0) {
             System.out.println("Payment status: PARTIAL");
-            System.out.printf("Remaining balance (carries over): $%.2f%n", due);
+            System.out.printf("Remaining balance (carries over): $%.2f%n", amountDue);
         } else {
             System.out.println("Payment status: UNPAID");
-            System.out.printf("Remaining balance (carries over): $%.2f%n", due);
+            System.out.printf("Remaining balance (carries over): $%.2f%n", amountDue);
         }
     }
 }
